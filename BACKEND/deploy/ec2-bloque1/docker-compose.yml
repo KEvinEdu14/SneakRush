@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  category-service:
+    build: ../../domains/product_catalog/category_service
+    env_file:
+      - ../../domains/product_catalog/category_service/.env
+    ports:
+      - "5000:5000"
+    networks:
+      - sneakrush
+
+networks:
+  sneakrush:
+    driver: bridge
