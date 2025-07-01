@@ -1,0 +1,22 @@
+# Dependencias
+node_modules
+npm-debug.log
+package-lock.json
+
+# Configuración local
+.env
+.env.local
+
+# Tests
+tests/
+coverage/
+jest.config.js
+
+# Documentación y editor
+README.md
+.vscode/
+*.swp
+
+# Archivos temporales
+*.log
+.DS_Store

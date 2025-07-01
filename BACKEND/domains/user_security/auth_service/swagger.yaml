@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  title: Auth Service - SneakRush
+  version: 1.0.0
+  description: API for user authentication (register, login, refresh token)
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+
+  /api/auth/login:
+    post:
+      summary: Log in a user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+        '401':
+          description: Invalid credentials
+
+  /api/auth/refresh-token:
+    post:
+      summary: Refresh JWT token
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed successfully
+        '403':
+          description: Invalid token or user not found
