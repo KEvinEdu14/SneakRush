@@ -1,0 +1,106 @@
+name: 🚀 Deploy Auth Service to QA
+
+on:
+  push:
+    branches:
+      - qa
+
+jobs:
+  terraform:
+    name: Terraform Apply QA
+    runs-on: ubuntu-latest
+    outputs:
+      postgres_endpoint: ${{ steps.set_outputs.outputs.postgres_endpoint }}
+      ec2_ip:             ${{ steps.set_outputs.outputs.ec2_ip }}
+    steps:
+      - name: Checkout infra
+        uses: actions/checkout@v3
+        with:
+          path: infra/terraform/qa
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        working-directory: infra/terraform/qa
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: infra/terraform/qa
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.QA_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.QA_AWS_SECRET_ACCESS_KEY }}
+        run: terraform apply -auto-approve
+
+      - name: Set outputs
+        id: set_outputs
+        working-directory: infra/terraform/qa
+        run: |
+          POSTGRES=$(terraform output -raw postgres_endpoint)
+          EC2_IP=$(terraform output -raw auth_service_ip)
+          echo "::set-output name=postgres_endpoint::${POSTGRES}"
+          echo "::set-output name=ec2_ip::${EC2_IP}"
+
+  deploy:
+    name: Deploy Auth Service to QA
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.QA_SSH_PRIVATE_KEY }}
+
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id     "${{ secrets.QA_AWS_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.QA_AWS_SECRET_ACCESS_KEY }}"
+          aws configure set default.region        "us-east-1"
+          aws configure set default.output        "json"
+
+      - name: Deploy via SSH
+        env:
+          POSTGRES: ${{ needs.terraform.outputs.postgres_endpoint }}
+          EC2_IP:   ${{ needs.terraform.outputs.ec2_ip }}
+          DB_PASS:  ${{ secrets.QA_DB_PASSWORD }}
+          JWT_SEC:  ${{ secrets.QA_JWT_SECRET }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP << 'SSH_EOF'
+            set -e
+
+            cd SneakRush
+            git fetch origin qa
+            git checkout qa
+
+            # Generar .env dentro del servidor
+            cat > BACKEND/domains/user_security/auth-service/.env << 'ENV_EOF'
+            PORT=8000
+            DB_HOST=$POSTGRES
+            DB_PORT=5432
+            DB_NAME=sneakrush
+            DB_USER=postgres
+            DB_PASSWORD=$DB_PASS
+            JWT_SECRET=$JWT_SEC
+            JWT_EXPIRES_IN=1h
+            ENV_EOF
+
+            # Construir y desplegar Docker
+            cd BACKEND/domains/user_security/auth-service
+            docker build -t auth-service .
+            docker rm -f auth-service || true
+            docker run -d --name auth-service \
+                      --env-file .env -p 8000:8000 auth-service
+
+          SSH_EOF

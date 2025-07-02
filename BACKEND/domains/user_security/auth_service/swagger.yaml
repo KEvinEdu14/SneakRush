@@ -79,3 +79,9 @@ paths:
           description: Token refreshed successfully
         '403':
           description: Invalid token or user not found
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
