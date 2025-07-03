@@ -1,51 +1,47 @@
-name: 🚀 QA Deploy All Services
+name: 🚀 QA Deploy Auth Service
 
 on:
   push:
     branches: [ qa ]
-
-env:
-  DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}
+    paths:
+      - 'BACKEND/domains/user_security/auth-service/**'
 
 jobs:
-  deploy-auth-service:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Build & Push Auth Image
-        run: |
-          IMAGE=${DOCKERHUB_REPO}/auth-service:${{ github.sha }}
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker build -t $IMAGE BACKEND/domains/user_security/auth-service
-          docker push $IMAGE
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+    - name: Build & Push Auth Image
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: |
+        IMAGE=${DOCKERHUB_USERNAME}/auth-service:${{ github.sha }}
+        echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+        docker build -t $IMAGE BACKEND/domains/user_security/auth-service
+        docker push $IMAGE
+        echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      - name: Deploy to QA EC2
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.QA_EC2_ELASTIC_IP }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/SneakRush/BACKEND/domains/user_security/auth-service
-            docker pull $IMAGE
-            docker rm -f auth-service || true
-            docker run -d \
-              --name auth-service \
-              --env-file .env \
-              -p 8000:8000 \
-              $IMAGE
+    - name: Deploy Auth to QA EC2
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.QA_EC2_ELASTIC_IP }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          set -e
+          cd /home/ubuntu/auth-service
+          docker pull $IMAGE
+          docker rm -f auth-service || true
+          docker run -d \
+            --name auth-service \
+            --env-file .env \
+            -p 8000:8000 \
+            $IMAGE
 
-      - name: Smoke-test health endpoint
-        run: |
-          # Usa ALB si existe, si no EC2 IP
-          TARGET="${{ secrets.QA_ALB_DNS }}:${{ '' }}"  # si ALB en 80
-          if [ -z "$TARGET" ]; then
-            TARGET="${{ secrets.QA_EC2_ELASTIC_IP }}:8000"
-          else
-            # si QA_ALB_DNS definido, omitimos :8000 (escucha en 80)
-            TARGET="${{ secrets.QA_ALB_DNS }}"
-          fi
-          echo "Probing health endpoint via $TARGET..."
-          curl --fail http://$TARGET/health
+    - name: Health check via ALB
+      run: |
+        sleep 10
+        curl --fail http://${{ secrets.QA_ALB_DNS }}/health
