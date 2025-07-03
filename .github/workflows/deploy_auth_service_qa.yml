@@ -3,8 +3,7 @@ name: 🚀 QA Deploy Auth Service
 on:
   push:
     branches: [ qa ]
-    paths:
-      - 'BACKEND/domains/user_security/auth-service/**'
+
 
 jobs:
   deploy:
