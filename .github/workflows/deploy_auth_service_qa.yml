@@ -21,8 +21,8 @@ jobs:
 
       - name: Build & Push Auth Image
         run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/auth-service:${{ github.sha }}
-          docker build -t $IMAGE BACKEND/domains/user_security/auth-service
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{ github.sha }}
+          docker build -t $IMAGE BACKEND/domains/user_security/auth_service
           docker push $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
@@ -34,11 +34,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            cd /home/ubuntu/auth-service
+            cd /home/ubuntu/auth_service
             docker pull $IMAGE
-            docker rm -f auth-service || true
+            docker rm -f auth_service || true
             docker run -d \
-              --name auth-service \
+              --name auth_service \
               --env-file .env \
               -p 8000:8000 \
               $IMAGE
