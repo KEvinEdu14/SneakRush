@@ -3,7 +3,7 @@ const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize(
   process.env.DB_NAME,       // sneakrush
   process.env.DB_USER,       // postgres
-  process.env.DB_PASSWORD,   // tu password
+  process.env.DB_PASSWORD,   
   {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
