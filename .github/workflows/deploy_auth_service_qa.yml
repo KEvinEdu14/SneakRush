@@ -4,43 +4,46 @@ on:
   push:
     branches: [ qa ]
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Build & Push Auth Image
-      env:
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      run: |
-        IMAGE=${DOCKERHUB_USERNAME}/auth-service:${{ github.sha }}
-        echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-        docker build -t $IMAGE BACKEND/domains/user_security/auth-service
-        docker push $IMAGE
-        echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Deploy Auth to QA EC2
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.QA_EC2_ELASTIC_IP }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          set -e
-          cd /home/ubuntu/auth-service
-          docker pull $IMAGE
-          docker rm -f auth-service || true
-          docker run -d \
-            --name auth-service \
-            --env-file .env \
-            -p 8000:8000 \
-            $IMAGE
+      - name: Build & Push Auth Image
+        run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/auth-service:${{ github.sha }}
+          docker build -t $IMAGE BACKEND/domains/user_security/auth-service
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-    - name: Health check via ALB
-      run: |
-        sleep 10
-        curl --fail http://${{ secrets.QA_ALB_DNS }}/health
+      - name: Deploy Auth to QA EC2
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.QA_EC2_ELASTIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/ubuntu/auth-service
+            docker pull $IMAGE
+            docker rm -f auth-service || true
+            docker run -d \
+              --name auth-service \
+              --env-file .env \
+              -p 8000:8000 \
+              $IMAGE
+
+      - name: Health check via ALB
+        run: |
+          sleep 10
+          curl --fail http://${{ secrets.QA_ALB_DNS }}/health
