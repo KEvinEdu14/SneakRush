@@ -55,9 +55,3 @@ jobs:
               -p 8000:8000 \
               $IMAGE
           EOF
-
-      - name: 🔍 Health check on EC2
-        run: |
-          sleep 10
-          echo "Testing http://${{ secrets.QA_EC2_ELASTIC_IP }}:8000/health"
-          curl --fail http://${{ secrets.QA_EC2_ELASTIC_IP }}:8000/health

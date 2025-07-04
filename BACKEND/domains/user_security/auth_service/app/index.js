@@ -20,6 +20,6 @@ app.use('/api/auth/refresh-token', require('./refresh_token/route'));
 // Arranque
 const PORT = process.env.PORT || 8000;
 sequelize.sync().then(() => {
-  app.listen(PORT, () => console.log(`Auth listening on ${PORT}`));
+  app.listen(PORT, () => console.log(`Auth service listening on ${PORT}`));
 });
 module.exports = app;
