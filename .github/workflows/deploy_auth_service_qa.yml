@@ -36,11 +36,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            cd /home/ubuntu/auth-service
+            cd /home/ubuntu/auth_service
             docker pull $IMAGE
-            docker rm -f auth-service || true
+            docker rm -f auth_service || true
             docker run -d \
-              --name auth-service \
+              --name auth_service \
               --env-file .env \
               -p 8000:8000 \
               $IMAGE
