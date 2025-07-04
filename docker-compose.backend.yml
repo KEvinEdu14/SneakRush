@@ -4,7 +4,7 @@ services:
   login_history:
     build: ./BACKEND/domains/user_security/login_history
     environment:
-      - DATABASE_URL=postgres://sneakrush:sneakrushpass@<IP-POSTGRES>:5432/sneakrushdb?sslmode=disable
+      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb?sslmode=disable
       - PORT=4000
     ports:
       - "4000:4000"
@@ -13,8 +13,11 @@ services:
     build: ./BACKEND/domains/user_security/auth_service
     env_file:
       - ./BACKEND/domains/user_security/auth_service/.env
+    environment:
+      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
     depends_on:
       - login_history
+      - 2fa_service
     ports:
       - "3000:3000"
 
@@ -24,6 +27,8 @@ services:
       - ./BACKEND/domains/user_security/2fa_service/.env
     ports:
       - "4002:4002"
+    environment:
+      - REDIS_URL=redis://34.193.151.166:6380
 
   notification_service:
     build: ./BACKEND/domains/orders_payments/notifications_service
@@ -31,6 +36,8 @@ services:
       - ./BACKEND/domains/orders_payments/notifications_service/.env
     ports:
       - "4003:4003"
+    environment:
+      - MONGO_URI=mongodb://34.193.151.166:27017/notificationsdb
 
   password_recovery:
     build: ./BACKEND/domains/user_security/password_recovery
@@ -38,3 +45,9 @@ services:
       - ./BACKEND/domains/user_security/password_recovery/.env
     ports:
       - "4004:4004"
+    environment:
+      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+
+networks:
+  default:
+    driver: bridge
