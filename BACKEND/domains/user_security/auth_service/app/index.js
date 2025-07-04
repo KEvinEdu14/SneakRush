@@ -22,5 +22,4 @@ const PORT = process.env.PORT || 8000;
 sequelize.sync().then(() => {
   app.listen(PORT, () => console.log(`Auth service listening on ${PORT}`));
 });
-
 module.exports = app;
