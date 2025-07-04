@@ -28,22 +28,21 @@ jobs:
 
       - name: Deploy Auth to QA EC2
         uses: appleboy/ssh-action@v0.1.8
-        env:
-          IMAGE: ${{ env.IMAGE }}
         with:
           host: ${{ secrets.QA_EC2_ELASTIC_IP }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: IMAGE=${{ env.IMAGE }}
           script: |
             set -e
             cd /home/ubuntu/auth_service
-            docker pull $IMAGE
+            docker pull "$IMAGE"
             docker rm -f auth_service || true
             docker run -d \
               --name auth_service \
               --env-file .env \
               -p 8000:8000 \
-              $IMAGE
+              "$IMAGE"
 
       - name: Health check via ALB
         run: |
