@@ -32,10 +32,11 @@ jobs:
           host: ${{ secrets.QA_EC2_ELASTIC_IP }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE=${{ env.IMAGE }}
+          envs: IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{ github.sha }}
           script: |
             set -e
             cd /home/ubuntu/auth_service
+            echo "Pulling image: $IMAGE"
             docker pull "$IMAGE"
             docker rm -f auth_service || true
             docker run -d \
