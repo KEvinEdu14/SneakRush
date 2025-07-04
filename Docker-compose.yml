@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # ---------- Bases de datos ----------
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: sneakrushdb
+      POSTGRES_USER: sneakrush
+      POSTGRES_PASSWORD: sneakrushpass
+    ports: ["5432:5432"]
+
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+
+  redis_2fa:
+    image: redis:alpine
+    ports: ["6380:6379"]
+
+  # ---------- Microservicios ----------
+  login_history:
+    build: ./BACKEND/domains/user_security/login_history
+    environment:
+      - DATABASE_URL=postgres://sneakrush:sneakrushpass@postgres:5432/sneakrushdb?sslmode=disable
+      - PORT=4000
+    depends_on: [ postgres ]
+    ports: ["4000:4000"]
+
+  auth_service:
+    build: ./BACKEND/domains/user_security/auth_service
+    env_file:
+      - ./BACKEND/domains/user_security/auth_service/.env
+    depends_on:
+      - postgres
+      - login_history
+      - 2fa_service
+    ports: ["3000:3000"]
+
+  2fa_service:
+    build: ./BACKEND/domains/user_security/2fa_service
+    env_file:
+      - ./BACKEND/domains/user_security/2fa_service/.env
+    depends_on:
+      - redis_2fa
+      - notification_service
+    ports: ["4002:4002"]
+
+  notification_service:
+    build: ./BACKEND/domains/orders_payments/notifications_service
+    env_file:
+      - ./BACKEND/domains/orders_payments/notifications_service/.env
+    depends_on:
+      - mongo
+    ports: ["4003:4003"]
+
+  password_recovery:
+    build: ./BACKEND/domains/user_security/password_recovery
+    env_file:
+      - ./BACKEND/domains/user_security/password_recovery/.env
+    depends_on:
+      - postgres
+      - notification_service
+    ports:
+      - "4004:4004"
+
+  user_profile_service:
+    build: ./BACKEND/domains/user_security/user_profile_service
+    env_file:
+      - ./BACKEND/domains/user_security/user_profile_service/.env
+    depends_on:
+      - postgres
+    ports:
+      - "4005:4005"
+
+networks:
+  default:
+    driver: bridge

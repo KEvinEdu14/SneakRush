@@ -1,29 +1,22 @@
-# 🔐 Auth Service - SneakRush
+# Auth Service - SneakRush
 
-Este microservicio gestiona la autenticación de usuarios para la plataforma SneakRush. Incluye funcionalidades para:
+Handles user login, registration, token generation, and authentication for the SneakRush platform.
 
-- Registro (`/api/auth/register`)
-- Login y emisión de JWT (`/api/auth/login`)
-- Renovación de token (`/api/auth/refresh-token`)
+## Endpoints
 
----
+- POST `/api/auth/login`
+- POST `/api/auth/register`
+- POST `/api/auth/refresh`
+- POST `/api/auth/logout`
 
-## 🚀 Tecnologías
+## Environment Variables
 
-- Node.js
-- Express
-- PostgreSQL (con Sequelize)
-- JWT para autenticación
-- Docker
-- GitHub Actions (CI/CD)
-- Swagger (documentación)
+- `PORT`
+- `JWT_SECRET`
+- `DATABASE_URL`
 
----
-
-## ⚙️ Instalación Local
-
-### 1. Clonar repositorio y moverse al servicio
+## Run locally
 
 ```bash
-git clone https://github.com/tu_usuario/SneakRush.git
-cd SneakRush/BACKEND/domains/user_security/auth-service
+npm install
+npm start

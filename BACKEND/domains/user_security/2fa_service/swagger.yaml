@@ -1,0 +1,63 @@
+
+---
+
+### **4. `swagger.yaml`**
+
+```yaml
+openapi: 3.0.0
+info:
+  title: 2FA Service
+  version: "1.0"
+  description: Two Factor Authentication API for SneakRush
+servers:
+  - url: http://localhost:4002
+paths:
+  /api/2fa/send:
+    post:
+      summary: Send 2FA code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                destination:
+                  type: string
+                  description: Email or phone to send code
+      responses:
+        '200':
+          description: 2FA code sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/2fa/validate:
+    post:
+      summary: Validate 2FA code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '200':
+          description: 2FA code validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
