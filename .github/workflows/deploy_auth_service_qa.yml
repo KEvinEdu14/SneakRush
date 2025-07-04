@@ -45,7 +45,8 @@ jobs:
               -p 8000:8000 \
               "$IMAGE"
 
-      - name: Health check via ALB
+      - name: Health check on EC2
         run: |
           sleep 10
-          curl --fail http://${{ secrets.QA_ALB_DNS }}/health
+          echo "Testing http://${{ secrets.QA_EC2_ELASTIC_IP }}:8000/health"
+          curl --fail http://${{ secrets.QA_EC2_ELASTIC_IP }}:8000/health
