@@ -45,10 +45,13 @@ jobs:
             set -e
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/auth_service:${{ github.sha }}
             cd /home/ubuntu/auth_service
+
+            # Alinea el nombre de la base de datos
+            sed -i 's/^DB_NAME=.*/DB_NAME=sneakrush/' .env
+
             echo "Pulling image: $IMAGE"
             docker pull $IMAGE
-            docker stop auth_service || true
-            docker rm auth_service || true
+            docker rm -f auth_service || true
             docker run -d \
               --name auth_service \
               --env-file /home/ubuntu/auth_service/.env \
