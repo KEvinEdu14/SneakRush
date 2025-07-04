@@ -64,15 +64,6 @@ services:
     ports:
       - "4004:4004"
 
-  user_profile_service:
-    build: ./BACKEND/domains/user_security/user_profile_service
-    env_file:
-      - ./BACKEND/domains/user_security/user_profile_service/.env
-    depends_on:
-      - postgres
-    ports:
-      - "4005:4005"
-
 networks:
   default:
     driver: bridge

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  login_history:
+    build: ./BACKEND/domains/user_security/login_history
+    environment:
+      - DATABASE_URL=postgres://sneakrush:sneakrushpass@<IP-POSTGRES>:5432/sneakrushdb?sslmode=disable
+      - PORT=4000
+    ports:
+      - "4000:4000"
+
+  auth_service:
+    build: ./BACKEND/domains/user_security/auth_service
+    env_file:
+      - ./BACKEND/domains/user_security/auth_service/.env
+    depends_on:
+      - login_history
+    ports:
+      - "3000:3000"
+
+  2fa_service:
+    build: ./BACKEND/domains/user_security/2fa_service
+    env_file:
+      - ./BACKEND/domains/user_security/2fa_service/.env
+    ports:
+      - "4002:4002"
+
+  notification_service:
+    build: ./BACKEND/domains/orders_payments/notifications_service
+    env_file:
+      - ./BACKEND/domains/orders_payments/notifications_service/.env
+    ports:
+      - "4003:4003"
+
+  password_recovery:
+    build: ./BACKEND/domains/user_security/password_recovery
+    env_file:
+      - ./BACKEND/domains/user_security/password_recovery/.env
+    ports:
+      - "4004:4004"
