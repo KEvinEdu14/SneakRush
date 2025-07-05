@@ -36,7 +36,6 @@ services:
     build: ./BACKEND/domains/orders_payments/notifications_service
     environment:
       - MONGO_URI=mongodb://34.193.151.166:27017/notificationsdb
-      - docker pull kevineduardo14/notification_service
       - REDIS_EVENTS_URL=redis://34.193.151.166:6380
       - PORT=4003
     ports:
@@ -45,12 +44,24 @@ services:
   password_recovery:
     build: ./BACKEND/domains/user_security/password_recovery
     environment:
-      - DATABASE_URL=DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
       - RESET_TOKEN_EXP_MINUTES=15
       - NOTIFICATION_SERVICE_URL=http://notification_service:4003/send
       - PORT=4004
     ports:
       - "4004:4004"
+
+  user_service:
+    build: ./BACKEND/domains/user_security/user_service
+    environment:
+      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - AUTH_SERVICE_URL=http://auth_service:3000
+      - NOTIFICATION_SERVICE_URL=http://notification_service:4003/send
+    ports:
+      - "8005:8000"
+    depends_on:
+      - auth_service
+      - notification_service
 
 networks:
   default:
