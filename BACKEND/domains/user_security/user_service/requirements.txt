@@ -3,7 +3,6 @@
  sqlalchemy
  psycopg2-binary
  python-dotenv
- pydantic
+ pydantic[email]
  httpx
- email-validator      # ← añade esto
  pytest
