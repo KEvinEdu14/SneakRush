@@ -58,7 +58,7 @@ services:
       - AUTH_SERVICE_URL=http://auth_service:3000
       - NOTIFICATION_SERVICE_URL=http://notification_service:4003/send
     ports:
-      - "8005:8000"
+      - "4005:8000"
     depends_on:
       - auth_service
       - notification_service

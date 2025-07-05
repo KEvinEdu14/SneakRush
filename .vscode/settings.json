@@ -4,6 +4,7 @@
         "create login microservice",
         "Edit Controllers and docker compose",
         "remove file settings",
-        "add new files"
+        "add new files",
+        "Edit code "
     ]
 }
