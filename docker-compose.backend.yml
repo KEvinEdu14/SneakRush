@@ -11,10 +11,12 @@ services:
 
   auth_service:
     build: ./BACKEND/domains/user_security/auth_service
-    env_file:
-      - ./BACKEND/domains/user_security/auth_service/.env
     environment:
       - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - JWT_SECRET=supersecretkey
+      - LOGIN_HISTORY_SOAP=http://login_history:4000/logins
+      - TWO_FA_URL=http://2fa_service:4002/api/2fa/send
+      - TWO_FA_SEND_URL=http://2fa_service:4002/api/2fa/send
     depends_on:
       - login_history
       - 2fa_service
@@ -23,30 +25,32 @@ services:
 
   2fa_service:
     build: ./BACKEND/domains/user_security/2fa_service
-    env_file:
-      - ./BACKEND/domains/user_security/2fa_service/.env
-    ports:
-      - "4002:4002"
     environment:
       - REDIS_URL=redis://34.193.151.166:6380
+      - NOTIFICATION_SERVICE=http://notification_service:4003/send
+      - PORT=4002
+    ports:
+      - "4002:4002"
 
   notification_service:
     build: ./BACKEND/domains/orders_payments/notifications_service
-    env_file:
-      - ./BACKEND/domains/orders_payments/notifications_service/.env
-    ports:
-      - "4003:4003"
     environment:
       - MONGO_URI=mongodb://34.193.151.166:27017/notificationsdb
+      - docker pull kevineduardo14/notification_service
+      - REDIS_EVENTS_URL=redis://34.193.151.166:6380
+      - PORT=4003
+    ports:
+      - "4003:4003"
 
   password_recovery:
     build: ./BACKEND/domains/user_security/password_recovery
-    env_file:
-      - ./BACKEND/domains/user_security/password_recovery/.env
+    environment:
+      - DATABASE_URL=DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - RESET_TOKEN_EXP_MINUTES=15
+      - NOTIFICATION_SERVICE_URL=http://notification_service:4003/send
+      - PORT=4004
     ports:
       - "4004:4004"
-    environment:
-      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
 
 networks:
   default:
