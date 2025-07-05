@@ -12,7 +12,7 @@ services:
   auth_service:
     build: ./BACKEND/domains/user_security/auth_service
     environment:
-      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - DATABASE_URL=DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb?sslmode=disable
       - JWT_SECRET=supersecretkey
       - LOGIN_HISTORY_SOAP=http://login_history:4000/logins
       - TWO_FA_URL=http://2fa_service:4002/api/2fa/send
@@ -44,7 +44,7 @@ services:
   password_recovery:
     build: ./BACKEND/domains/user_security/password_recovery
     environment:
-      - DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - DATABASE_URL=DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb?sslmode=disable
       - RESET_TOKEN_EXP_MINUTES=15
       - NOTIFICATION_SERVICE_URL=http://notification_service:4003/send
       - PORT=4004
@@ -54,7 +54,7 @@ services:
   user_service:
     build: ./BACKEND/domains/user_security/user_service
     environment:
-      - DATABASE_URL=postgres://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb
+      - DATABASE_URL=DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb?sslmode=disable
       - AUTH_SERVICE_URL=http://auth_service:3000
       - NOTIFICATION_SERVICE_URL=http://notification_service:4003/send
     ports:
