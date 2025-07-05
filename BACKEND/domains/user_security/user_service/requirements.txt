@@ -1,9 +1,9 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-psycopg2-binary
-python-dotenv
-pydantic
-pytest
-httpx
-email-validator
+ fastapi
+ uvicorn[standard]
+ sqlalchemy
+ psycopg2-binary
+ python-dotenv
+ pydantic
+ httpx
+ email-validator      # ← añade esto
+ pytest
