@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Checkout Service API
+  version: "1.0.0"
+servers:
+  - url: /
+paths:
+  /checkout/{user_id}:
+    post:
+      summary: Process checkout for a user
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: coupon
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Checkout processed
+components:
+  schemas:
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: integer
+    CheckoutResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        total:
+          type: number
