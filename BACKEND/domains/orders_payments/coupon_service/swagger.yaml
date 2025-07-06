@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: Coupon Service API
+  version: "1.0.0"
+servers:
+  - url: /
+paths:
+  /coupons/{code}/validate:
+    get:
+      summary: Validate a coupon code
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Coupon valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponValidateResponse'
+        '404':
+          description: Coupon not found or inactive
+components:
+  schemas:
+    CouponValidateResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        discount:
+          type: number
