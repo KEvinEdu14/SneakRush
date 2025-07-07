@@ -64,7 +64,7 @@ services:
       - notification_service
 
   cart_service:
-    image: kevineduardo14/cart_service:latest
+    build: ./BACKEND/domains/orders_payments/cart_service
     environment:
       - REDIS_URL=redis://34.193.151.166:6380
       - AUTH_SERVICE_URL=http://auth_service:3000
@@ -72,9 +72,26 @@ services:
       - PORT=4001
     ports:
       - "4006:4001"
+
+  checkout_service:
+    build: ./BACKEND/domains/orders_payments/checkout_service
+    environment:
+      - DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb?sslmode=disable
+      - CART_SERVICE_URL=http://cart_service:4006
+      - STOCK_SERVICE_URL=http://stock_service:4008
+      - COUPON_SERVICE_URL=http://coupon_service:4009
+    ports:
+      - "4007:8004"
     depends_on:
-      - auth_service
-      - checkout_service
+      - cart_service
+      - coupon_service
+
+  coupon_service:
+    build: ./BACKEND/domains/orders_payments/coupon_service
+    environment:
+      - DATABASE_URL=postgresql://sneakrush:sneakrushpass@34.193.151.166:5432/sneakrushdb?sslmode=disable
+    ports:
+      - "4008:8002"
 
 networks:
   default:
